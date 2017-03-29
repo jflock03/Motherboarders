@@ -61,7 +61,7 @@ class conversation_dictionary(object):
                     statement = statement.replace("'", "\\'")
                 parseyed_statement = subprocess.check_output('echo ' + statement + ' | syntaxnet/demo.sh', shell=True)
                 parseyed_statement = str(parseyed_statement,'utf-8')
-                statement_vector = clean_tree(parseyed_statement)
+                statement_vector = clean_tree(parseyed_statement, line)
                 x += 1
             elif x == 2:
                 # Response
@@ -70,7 +70,7 @@ class conversation_dictionary(object):
                     response = response.replace("'", "\\'")
                 parseyed_response = subprocess.check_output('echo ' + response + ' | syntaxnet/demo.sh', shell=True)
                 parseyed_response = str(parseyed_response,'utf-8')
-                response_vector = clean_tree(parseyed_response)
+                response_vector = clean_tree(parseyed_response, line)
                 # Store statement/response pair in db
                 self.add_pair(statement_vector, response_vector)
                 x = 1  
@@ -115,17 +115,17 @@ class conversation_dictionary(object):
             
         
 
-def clean_tree(tree):
+def clean_tree(tree, initial_sentence):
     ##Input: Takes in the string representing a tree and cleans it
     ##Idea: Go until you find a \n and take everything before it.
     ##      Then skip every non-alphabet or punctuation character and repeat.
     ##Returns: Vector tuple of sentence: ((sentence_tuple), (word1_list), (word2_list))
 
-    sentence_vector = []
+    sentence_vector = [initial_sentence]
     start_of_tree = tree.find("Input:")
     tree = tree[start_of_tree+7:]
     tree_list = tree.split("\n")
-    for word in tree_list:
+    for word in tree_list[1:]:
         word = word.replace("+--", "")
         word_vector = word.split(' ')
         while '' in word_vector:
@@ -141,7 +141,7 @@ def clean_tree(tree):
 def test_run():
     dic = conversation_dictionary()
     dic.load_dictionary()
-    user_input = input("Text to tag (X to exit): ")
+    user_input = input("You (X to exit): ")
     while user_input != "X":
         #escape single quotes for words such as what're
         if "'" in user_input:
@@ -150,15 +150,15 @@ def test_run():
         stdoutdata = subprocess.check_output('echo ' + user_input + ' | syntaxnet/demo.sh', shell=True)
         stdoutdata = str(stdoutdata,'utf-8')
         
-        vector = clean_tree(stdoutdata)
-        print("vector: ", vector)
-        print(dic.get_best_response(vector))
+        vector = clean_tree(stdoutdata, user_input)
+        print("Bot: ", dic.get_best_response(vector))
 
-        user_input = input("Text to tag (X to exit): ")
+        user_input = input("You (X to exit): ")
        
 def main():
 ##    dic = conversation_dictionary()
 ##    dic.add_data('greetings_data.txt')
+##    dic.to_string()
     test_run()
     
   
