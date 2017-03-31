@@ -2,6 +2,8 @@
 import subprocess
 from subprocess import call
 import pickle
+import numpy as np
+import random
 
 class conversation_dictionary(object):
     ## Dictionary object
@@ -59,7 +61,7 @@ class conversation_dictionary(object):
                     statement = statement.replace("'", "\\'")
                 parseyed_statement = subprocess.check_output('echo ' + statement + ' | syntaxnet/demo.sh', shell=True)
                 parseyed_statement = str(parseyed_statement,'utf-8')
-                statement_vector = clean_tree(parseyed_statement)
+                statement_vector = clean_tree(parseyed_statement, line)
                 x += 1
             elif x == 2:
                 # Response
@@ -68,7 +70,7 @@ class conversation_dictionary(object):
                     response = response.replace("'", "\\'")
                 parseyed_response = subprocess.check_output('echo ' + response + ' | syntaxnet/demo.sh', shell=True)
                 parseyed_response = str(parseyed_response,'utf-8')
-                response_vector = clean_tree(parseyed_response)
+                response_vector = clean_tree(parseyed_response, line)
                 # Store statement/response pair in db
                 self.add_pair(statement_vector, response_vector)
                 x = 1  
@@ -77,23 +79,53 @@ class conversation_dictionary(object):
         self.save_dictionary()
         print("Data added successfully.")
         
+    def compare_parsey_vectors(self, vector1, vector2):
+        ##Takes in parseyed vectors1 and 2
+        ##Vectors in the form ((sentence tuple), (word1, POS, senTag), (word2, POS, senTag), ...)
+        tree_vector = vector1[1:]
+        tree_vector2 = vector2[1:]
+        numpy_vector = []
 
-    ## def get_best_response(self, input_vector):
+        #Only compare words up to the length of the shortest sentence
+        for i in range(0, min(len(tree_vector), len(tree_vector2))):
+            for j in range(0, 3):
+                if tree_vector[i][j] == tree_vector2[i][j]:
+                    numpy_vector.append(1)
+                else:
+                    numpy_vector.append(0)
+        numpy_vector.append(1/len(tree_vector))
+        numpy_vector = np.array(numpy_vector)
+        return np.linalg.norm(numpy_vector)
+        
+            
+    def get_best_response(self, input_vector):
         ## Takes in an input vector and runs through the dictionary
         ## Finding the closest vector to the input.
         ## Returns a response in string format
+        best_response = ''
+        max_value = 0
+        for key, value in self.dictionary.items():
+            result_score = self.compare_parsey_vectors(key, input_vector)
+            if result_score > max_value:
+                max_value = result_score
+                random_index = random.randint(0, len(value)-1)
+                response_vector = value[random_index][0]
+        
+        return response_vector
+            
+        
 
-def clean_tree(tree):
+def clean_tree(tree, initial_sentence):
     ##Input: Takes in the string representing a tree and cleans it
     ##Idea: Go until you find a \n and take everything before it.
     ##      Then skip every non-alphabet or punctuation character and repeat.
     ##Returns: Vector tuple of sentence: ((sentence_tuple), (word1_list), (word2_list))
 
-    sentence_vector = []
+    sentence_vector = [initial_sentence]
     start_of_tree = tree.find("Input:")
     tree = tree[start_of_tree+7:]
     tree_list = tree.split("\n")
-    for word in tree_list:
+    for word in tree_list[1:]:
         word = word.replace("+--", "")
         word_vector = word.split(' ')
         while '' in word_vector:
@@ -107,7 +139,9 @@ def clean_tree(tree):
 
 
 def test_run():
-    user_input = input("Text to tag (X to exit): ")
+    dic = conversation_dictionary()
+    dic.load_dictionary()
+    user_input = input("You (X to exit): ")
     while user_input != "X":
         #escape single quotes for words such as what're
         if "'" in user_input:
@@ -115,42 +149,18 @@ def test_run():
             
         stdoutdata = subprocess.check_output('echo ' + user_input + ' | syntaxnet/demo.sh', shell=True)
         stdoutdata = str(stdoutdata,'utf-8')
-        vector = clean_tree(stdoutdata)
-        print("vector: ", vector)
+        
+        vector = clean_tree(stdoutdata, user_input)
+        print("Bot: ", dic.get_best_response(vector))
 
-        user_input = input("Text to tag (X to exit): ")
-
-
+        user_input = input("You (X to exit): ")
        
 def main():
-    print("Training/Test Menu")
-    print("------------------")
-    print("1. Test parsey on strings")
-    print("2. Create/Load dictionary")
-    print("X. Exit")
-    user_input = input("Choice: ")
-    while user_input != "X":
-        if user_input == "1":
-            #Test run on user strings
-            test_run()
-        elif user_input == "2":
-            #Add data to dictionary
-            dic = conversation_dictionary()
-            data_file = input("File name of text data to add to dictionary: ")
-            dic.add_data(data_file)
-            print_dic = input("Would you like to see the dictionary?(y/n): ")
-            if print_dic == "y":
-                dic.to_string()
-        else:
-            user_input = input("Choose between option 1 or option 2: ")
-        print("\n")
-        print("Training/Test Menu")
-        print("------------------")
-        print("1. Test parsey on strings")
-        print("2. Create/Load dictionary")
-        print("X. Exit")
-        user_input = input("Choice: ")
-   
+##    dic = conversation_dictionary()
+##    dic.add_data('greetings_data.txt')
+##    dic.to_string()
+    test_run()
+    
   
 main()
 
