@@ -18,5 +18,8 @@ What're you doing tomorrow?
 Nothing, what about you?
 I am in class.
 Okay text me after.
+<<<<<<< HEAD
 I am in class man.
 Okay.
+=======
+>>>>>>> 88a8cf96d04a3f091d4f98c22e892e8176a4f0cc

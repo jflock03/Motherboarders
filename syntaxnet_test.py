@@ -93,7 +93,11 @@ class conversation_dictionary(object):
                     numpy_vector.append(1)
                 else:
                     numpy_vector.append(0)
+<<<<<<< HEAD
         numpy_vector.append(1/len(tree_vector))
+=======
+    
+>>>>>>> 88a8cf96d04a3f091d4f98c22e892e8176a4f0cc
         numpy_vector = np.array(numpy_vector)
         return np.linalg.norm(numpy_vector)
         
