@@ -93,11 +93,7 @@ class conversation_dictionary(object):
                     numpy_vector.append(1)
                 else:
                     numpy_vector.append(0)
-<<<<<<< HEAD
         numpy_vector.append(1/len(tree_vector))
-=======
-    
->>>>>>> 88a8cf96d04a3f091d4f98c22e892e8176a4f0cc
         numpy_vector = np.array(numpy_vector)
         return np.linalg.norm(numpy_vector)
         
@@ -163,8 +159,26 @@ def main():
 ##    dic = conversation_dictionary()
 ##    dic.add_data('greetings_data.txt')
 ##    dic.to_string()
-    test_run()
-    
+    print("--- Welcome to Motherboarders automatic text response program ---")
+    print("Options: 1. Add data to dictionary" +
+                        " 2. Talk to the bot (X to exit)")
+    user_choice = input("Choice: ")
+    while user_choice != "X":
+        if user_choice == "1":
+            file_name = input("Name of data text file: ")
+            dic = conversation_dictionary()
+            try:
+                dic.add_data(file_name)
+                print("Finished adding data.")
+            except:
+                print("No data file of that name found.")   
+        elif user_choice == "2":
+            test_run()
+        else:
+            print("Choose option 1 or option 2 or X to exit")
+        print("Options: 1. Add data to dictionary" +
+                        " 2. Talk to the bot (X to exit)")            
+        user_choice = input("Choice: ")
   
 main()
 
