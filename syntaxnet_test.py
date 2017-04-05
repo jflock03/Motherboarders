@@ -160,7 +160,7 @@ def main():
 ##    dic.add_data('greetings_data.txt')
 ##    dic.to_string()
     print("--- Welcome to Motherboarders automatic text response program ---")
-    print("Options: 1. Add data to dictionary" +
+    print("Options: 1. Add data to the bot" +
                         " 2. Talk to the bot (X to exit)")
     user_choice = input("Choice: ")
     while user_choice != "X":
@@ -176,7 +176,7 @@ def main():
             test_run()
         else:
             print("Choose option 1 or option 2 or X to exit")
-        print("Options: 1. Add data to dictionary" +
+        print("Options: 1. Add data to the bot" +
                         " 2. Talk to the bot (X to exit)")            
         user_choice = input("Choice: ")
   
