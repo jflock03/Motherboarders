@@ -22,7 +22,12 @@ class weights(object):
         except:
             print("Could not find one of the pickled files")
 
-    #def save_weights(self)
+    def save_weights(self, POS_fileName, label_fileName):
+        try:
+            pickle.dump(self.POS_tags, POS_fileName)
+            pickle.dump(self.label_tags, lable_fileName)
+        except:
+            print("Could not find one of the pickled files")
 
     #def to_string()
 
