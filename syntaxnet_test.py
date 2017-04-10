@@ -82,6 +82,7 @@ class conversation_dictionary(object):
     def compare_parsey_vectors(self, vector1, vector2):
         ##Takes in parseyed vectors1 and 2
         ##Vectors in the form ((sentence tuple), (word1, POS, senTag), (word2, POS, senTag), ...)
+        ##tree_vector = key from dic, tree_vector2 = input vector
         tree_vector = vector1[1:]
         tree_vector2 = vector2[1:]
         numpy_vector = []
@@ -93,7 +94,11 @@ class conversation_dictionary(object):
                     numpy_vector.append(1)
                 else:
                     numpy_vector.append(0)
-        numpy_vector.append(1/len(tree_vector))
+        if len(tree_vector2) > len(tree_vector):
+            weight = len(tree_vector2) - len(tree_vector) + 1
+        else:
+            weight = len(tree_vector)- len(tree_vector2) + 1
+        numpy_vector.append(1/weight)
         numpy_vector = np.array(numpy_vector)
         return np.linalg.norm(numpy_vector)
         
