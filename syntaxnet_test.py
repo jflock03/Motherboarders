@@ -4,6 +4,7 @@ from subprocess import call
 import pickle
 import numpy as np
 import random
+import time
 
 class conversation_dictionary(object):
     ## Dictionary object
@@ -33,25 +34,28 @@ class conversation_dictionary(object):
     def load_dictionary(self):
         ## Load dictionary and save it as self.dictionary
         if len(self.dictionary) == 0:
+            dic_file = input("Dictionary file name to load: ")
             try:
-                self.dictionary = pickle.load(open( "dictionary.p", "rb"))
+                self.dictionary = pickle.load(open( dic_file, "rb"))
             except:
-                print("No existing pickled dictionary")
+                print("No existing pickled dictionary. creating empty one.")
         else:
             print("Current dictionary not empty, save first.")
 
     def save_dictionary(self):
         ## Dump (write) dictionary to disk
-        pickle.dump(self.dictionary, open( "dictionary.p", "wb"))
+        dic_file = input("Dictionary file name to save to: ")
+        pickle.dump(self.dictionary, open( dic_file, "wb"))
 
     def add_data(self, file_name):
         ## Takes in a txt file name, runs throught the file line by line
         ## input file format: statement on line 1, response line 2, empty line 3
         ## Loads pickled dictionary if it exists then adds key/value pairs
-        
+        time_start = time.time()
         self.load_dictionary()
         input_data = open(file_name, 'r')
         x = 1
+        line_count = 0
         for line in input_data:
             line = line.strip()
             if x == 1:
@@ -73,9 +77,14 @@ class conversation_dictionary(object):
                 response_vector = clean_tree(parseyed_response, line)
                 # Store statement/response pair in db
                 self.add_pair(statement_vector, response_vector)
-                x = 1  
+                x = 1
+            line_count += 1
 
         input_data.close()
+        time_end = time.time()
+
+        print("Number of lines:", line_count, end = " | ")
+        print("Time elapsed: %.1f" % (time_end-time_start))
         self.save_dictionary()
         print("Data added successfully.")
         
@@ -175,6 +184,7 @@ def main():
 ##    dic.add_data('greetings_data.txt')
 ##    dic.to_string()
     print("--- Welcome to Motherboarders automatic text response program ---")
+    print("-"*75)
     print("Options: 1. Add data to the bot" +
                         " 2. Talk to the bot (X to exit)")
     user_choice = input("Choice: ")
@@ -184,13 +194,13 @@ def main():
             dic = conversation_dictionary()
             try:
                 dic.add_data(file_name)
-                print("Finished adding data.")
             except:
                 print("No data file of that name found.")   
         elif user_choice == "2":
             test_run()
         else:
             print("Choose option 1 or option 2 or X to exit")
+        print("-"*75)
         print("Options: 1. Add data to the bot" +
                         " 2. Talk to the bot (X to exit)")            
         user_choice = input("Choice: ")
