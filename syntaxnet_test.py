@@ -86,8 +86,16 @@ class conversation_dictionary(object):
         tree_vector = vector1[1:]
         tree_vector2 = vector2[1:]
         numpy_vector = []
+        scores = []
 
+        shifts = max(len(tree_vector), len(tree_vector2)) - \
+                 min(len(tree_vector), len(tree_vector2))
+
+        
         #Only compare words up to the length of the shortest sentence
+        #Then shift to the right up to the distance between vectors
+        
+        #for i in range(0, shifts+1):
         for i in range(0, min(len(tree_vector), len(tree_vector2))):
             for j in range(0, 3):
                 if tree_vector[i][j] == tree_vector2[i][j]:
@@ -100,6 +108,8 @@ class conversation_dictionary(object):
             weight = len(tree_vector)- len(tree_vector2) + 1
         numpy_vector.append(1/weight)
         numpy_vector = np.array(numpy_vector)
+        #scores.append(np.linalg.norm(numpy_vector)
+        #after for loop, return max(scores)
         return np.linalg.norm(numpy_vector)
         
             
