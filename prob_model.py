@@ -23,14 +23,19 @@ class probability_model(object):
         for input_vector, response_vector in dictionary.dictionary.items():
             for word in input_vector[1:]:
                 if word not in self.dictionary:
+                    ## If tagged input word not already in main dictionary
                     self.dictionary[word] = {}
                     for response in response_vector:
                         for response_word in response[1:]:
                             POS_tag = response_word[1]
                             label_tag = response_word[2]
                             key = (POS_tag, label_tag)
-                            self.dictionary[word][key] = [response_word[0]]
+                            if key in self.dictionary[word]:
+                                self.dictionary[word][key].append(response_word[0])
+                            else:
+                                self.dictionary[word][key] = [response_word[0]]
                 else:
+                    ## Tagged input word is already in main dictionary
                     for response in response_vector:
                         for response_word in response[1:]:
                             POS_tag = response_word[1]
