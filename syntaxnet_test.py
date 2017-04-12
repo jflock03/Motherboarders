@@ -94,7 +94,6 @@ class conversation_dictionary(object):
         ##tree_vector = key from dic, tree_vector2 = input vector
         tree_vector = vector1[1:]
         tree_vector2 = vector2[1:]
-        numpy_vector = []
         scores = []
 
         shifts = max(len(tree_vector), len(tree_vector2)) - \
@@ -104,29 +103,35 @@ class conversation_dictionary(object):
         #Only compare words up to the length of the shortest sentence
         #Then shift to the right up to the distance between vectors
         
-        #for i in range(0, shifts+1):
-        for i in range(0, min(len(tree_vector), len(tree_vector2))):
-            for j in range(0, 3):
-                if tree_vector[i][j] == tree_vector2[i][j]:
-                    numpy_vector.append(1)
-                else:
-                    numpy_vector.append(0)
-        if len(tree_vector2) > len(tree_vector):
-            weight = len(tree_vector2) - len(tree_vector) + 1
-        else:
-            weight = len(tree_vector)- len(tree_vector2) + 1
-        numpy_vector.append(1/weight)
-        numpy_vector = np.array(numpy_vector)
-        #scores.append(np.linalg.norm(numpy_vector)
-        #after for loop, return max(scores)
-        return np.linalg.norm(numpy_vector)
+        for x in range(0, shifts+1):
+            numpy_vector = []
+            for i in range(0, min(len(tree_vector), len(tree_vector2))):
+                for j in range(0, 3):
+                    if len(tree_vector) > len(tree_vector2):
+                        if tree_vector[i+x][j] == tree_vector2[i][j]:
+                            numpy_vector.append(1)
+                        else:
+                            numpy_vector.append(0)
+                    else:
+                        if tree_vector[i][j] == tree_vector2[i+x][j]:
+                            numpy_vector.append(1)
+                        else:
+                            numpy_vector.append(0)
+            if len(tree_vector2) > len(tree_vector):
+                weight = len(tree_vector2) - len(tree_vector) + 1
+            else:
+                weight = len(tree_vector)- len(tree_vector2) + 1
+            numpy_vector.append(1/weight)
+            numpy_vector = np.array(numpy_vector)
+            scores.append(np.linalg.norm(numpy_vector))
+        return max(scores)
         
             
     def get_best_response(self, input_vector):
         ## Takes in an input vector and runs through the dictionary
         ## Finding the closest vector to the input.
         ## Returns a response in string format
-        best_response = ''
+        
         max_value = 0
         for key, value in self.dictionary.items():
             result_score = self.compare_parsey_vectors(key, input_vector)
@@ -134,7 +139,9 @@ class conversation_dictionary(object):
                 max_value = result_score
                 random_index = random.randint(0, len(value)-1)
                 response_vector = value[random_index][0]
-        
+
+        ## Add if max_value not over some threshold, then create response based on prob model
+                
         return response_vector
             
         
