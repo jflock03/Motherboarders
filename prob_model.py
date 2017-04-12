@@ -20,19 +20,19 @@ class probability_model(object):
     #def save_model(self)
 
     def train(self, dictionary):
-        for input_vector, response_vector in dictionary.items():
-            for word in input_vector:
+        for input_vector, response_vector in dictionary.dictionary.items():
+            for word in input_vector[1:]:
                 if word not in self.dictionary:
                     self.dictionary[word] = {}
                     for response in response_vector:
-                        for response_word in response:
+                        for response_word in response[1:]:
                             POS_tag = response_word[1]
                             label_tag = response_word[2]
                             key = (POS_tag, label_tag)
                             self.dictionary[word][key] = [response_word[0]]
                 else:
                     for response in response_vector:
-                        for response_word in response:
+                        for response_word in response[1:]:
                             POS_tag = response_word[1]
                             label_tag = response_word[2]
                             key = (POS_tag, label_tag)
@@ -41,8 +41,16 @@ class probability_model(object):
                             else:
                                 self.dictionary[word][key] = [response_word[0]]
 
+        self.to_string()
+
     def to_string(self):
-        print(self.dictionary)
+        for key, val in self.dictionary.items():
+            print("Input Key: ", key)
+            for key2, val2 in val.items():
+                print("Response tags key: ", key2, end = "   ")
+                print("value: ", val2)
+            print("-----------------------------------")
+
                         
 
     #def get_response(self, input_sentence, output_format)
@@ -56,13 +64,13 @@ class probability_model(object):
     ##         Use most used word when from this list.
     ##         i.e max(sum of prob(inword, outword) * prob(inword2, outword2)..)
 
-dictionary = {}
-dictionary[(('hello', 'UH', 'discourse'),)] = [(('hi', 'UH', 'discourse'),), (('yo', 'UH', 'discourse'),)]
-dictionary[(('hello', 'UH', 'discourse'), ('man', 'NN', 'nn'))] = \
-           [(('hi', 'UH', 'discourse'), ('man','NN', 'nn')), (('yo', 'UH', 'discourse'),)]
-
-dic = probability_model()
-dic.train(dictionary)
-dic.to_string()
+##dictionary = {}
+##dictionary[(('hello', 'UH', 'discourse'),)] = [(('hi', 'UH', 'discourse'),), (('yo', 'UH', 'discourse'),)]
+##dictionary[(('hello', 'UH', 'discourse'), ('man', 'NN', 'nn'))] = \
+##           [(('hi', 'UH', 'discourse'), ('man','NN', 'nn')), (('yo', 'UH', 'discourse'),)]
+##
+##dic = probability_model()
+##dic.train(dictionary)
+##dic.to_string()
     
 

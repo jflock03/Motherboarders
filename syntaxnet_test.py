@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 import random
 import time
+from prob_model import probability_model as model
 
 class conversation_dictionary(object):
     ## Dictionary object
@@ -171,7 +172,9 @@ def clean_tree(tree, initial_sentence):
 
 def test_run():
     dic = conversation_dictionary()
+    prob_model = model()
     dic.load_dictionary()
+    prob_model.train(dic)
     user_input = input("You (X to exit): ")
     while user_input != "X":
         #escape single quotes for words such as what're
