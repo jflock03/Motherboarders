@@ -39,7 +39,7 @@ class conversation_dictionary(object):
             try:
                 self.dictionary = pickle.load(open( dic_file, "rb"))
             except:
-                print("No existing pickled dictionary. creating empty one.")
+                print("No existing pickled dictionary. Creating empty one.")
         else:
             print("Current dictionary not empty, save first.")
 
@@ -65,6 +65,7 @@ class conversation_dictionary(object):
                 if "'" in statement:
                     statement = statement.replace("'", "\\'")
                 parseyed_statement = subprocess.check_output('echo ' + statement + ' | syntaxnet/demo.sh', shell=True)
+                time.sleep(.01)
                 parseyed_statement = str(parseyed_statement,'utf-8')
                 statement_vector = clean_tree(parseyed_statement, line)
                 x += 1
@@ -74,6 +75,7 @@ class conversation_dictionary(object):
                 if "'" in response:
                     response = response.replace("'", "\\'")
                 parseyed_response = subprocess.check_output('echo ' + response + ' | syntaxnet/demo.sh', shell=True)
+                time.sleep(.01)
                 parseyed_response = str(parseyed_response,'utf-8')
                 response_vector = clean_tree(parseyed_response, line)
                 # Store statement/response pair in db
@@ -174,7 +176,9 @@ def test_run():
     dic = conversation_dictionary()
     prob_model = model()
     dic.load_dictionary()
+    dic.to_string()
     prob_model.train(dic)
+    #print(prob_model.get_response((('Hi', 'UH', 'discourse'),), (('Hey', 'UH', 'ROOT'),)))
     user_input = input("You (X to exit): ")
     while user_input != "X":
         #escape single quotes for words such as what're

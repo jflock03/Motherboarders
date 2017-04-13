@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+import pickle
+import random
+
 ## This object is built using the conversation_dictionary object
 ## It parses through the dictionary and determines probability of seeing
 ## a certain word (with tags) in the response, based on the certain word in the
@@ -15,13 +18,26 @@ class probability_model(object):
     def __init__(self):
         self.dictionary = {}
 
-    #def load_model(self)
+    def load_dictionary(self):
+        ## Load dictionary and save it as self.dictionary
+        if len(self.dictionary) == 0:
+            dic_file = input("Dictionary model file name to load: ")
+            try:
+                self.dictionary = pickle.load(open( dic_file, "rb"))
+            except:
+                print("No existing pickled dictionary model. Creating empty one.")
+        else:
+            print("Current dictionary model not empty, save first.")
         
-    #def save_model(self)
+    def save_dictionary(self):
+        ## Dump (write) dictionary to disk
+        dic_file = input("Dictionary file name to save to: ")
+        pickle.dump(self.dictionary, open( dic_file, "wb"))
 
     def train(self, dictionary):
         for input_vector, response_vector in dictionary.dictionary.items():
             for word in input_vector[1:]:
+                word = word[0]
                 if word not in self.dictionary:
                     ## If tagged input word not already in main dictionary
                     self.dictionary[word] = {}
@@ -30,10 +46,14 @@ class probability_model(object):
                             POS_tag = response_word[1]
                             label_tag = response_word[2]
                             key = (POS_tag, label_tag)
-                            if key in self.dictionary[word]:
-                                self.dictionary[word][key].append(response_word[0])
+                            
+                            if key not in self.dictionary[word]:
+                                self.dictionary[word][key] = {}
+                                
+                            if response_word[0] in self.dictionary[word][key]:
+                                self.dictionary[word][key][response_word[0]]+=1
                             else:
-                                self.dictionary[word][key] = [response_word[0]]
+                                self.dictionary[word][key][response_word[0]] = 1
                 else:
                     ## Tagged input word is already in main dictionary
                     for response in response_vector:
@@ -41,10 +61,14 @@ class probability_model(object):
                             POS_tag = response_word[1]
                             label_tag = response_word[2]
                             key = (POS_tag, label_tag)
-                            if key in self.dictionary[word]:
-                                self.dictionary[word][key].append(response_word[0])
+                            
+                            if key not in self.dictionary[word]:
+                                self.dictionary[word][key] = {}
+                                
+                            if response_word[0] in self.dictionary[word][key]:
+                                self.dictionary[word][key][response_word[0]]+=1
                             else:
-                                self.dictionary[word][key] = [response_word[0]]
+                                self.dictionary[word][key][response_word[0]] = 1
 
         self.to_string()
 
@@ -57,25 +81,48 @@ class probability_model(object):
             print("-----------------------------------")
 
                         
+    def remove_words_from_tags(self, tagged_sentence):
+        my_lis = []
+        for tagged_word in tagged_sentence:
+            tags = tagged_word[1:]
+            my_lis.append(tags)
 
-    #def get_response(self, input_sentence, output_format)
-    ## Input: parseyed input sentence & output sentence format
-    ## Output: String of response sentence
-    ## Method: iterate over words in input_sentence then
-    ##         iterate over POStag/labeltag in output sentence format
-    ##         for each tag pair look up the corresponding key
-    ##         its value will be the words with probabilities.
-    ##         Get list of words that all of the input words share.
-    ##         Use most used word when from this list.
-    ##         i.e max(sum of prob(inword, outword) * prob(inword2, outword2)..)
+        return tuple(my_lis)
 
-##dictionary = {}
-##dictionary[(('hello', 'UH', 'discourse'),)] = [(('hi', 'UH', 'discourse'),), (('yo', 'UH', 'discourse'),)]
-##dictionary[(('hello', 'UH', 'discourse'), ('man', 'NN', 'nn'))] = \
-##           [(('hi', 'UH', 'discourse'), ('man','NN', 'nn')), (('yo', 'UH', 'discourse'),)]
-##
-##dic = probability_model()
-##dic.train(dictionary)
-##dic.to_string()
+    def find_max(self, dictionary):
+        myMax = 0
+        myWordCandidates = []
+        for word, count in dictionary.items():
+            if count > myMax:
+                myMax = count
+                myWordCandidates = [word]
+            elif count == myMax:
+                myWordCandidates.append(word)
+        i = random.randint(0, len(myWordCandidates)-1)
+        return myWordCandidates[i]
+            
+    def get_response(self, input_sentence, output_format):
+        
+        strip_format = self.remove_words_from_tags(output_format)
+        response_string = ''
+        for tags in strip_format:
+            response_candidates = {}
+            for tagged_word in input_sentence:
+                my_words = self.dictionary[tagged_word[0]][tags]
+                for word in my_words:
+                    if word in response_candidates:
+                        response_candidates[word] += my_words[word]
+                    else:
+                        response_candidates[word] = my_words[word]
+            response_word = self.find_max(response_candidates)
+
+            response_string += response_word
+            response_string += ' '
+
+        return response_string
+        
+    
+
+
     
 
