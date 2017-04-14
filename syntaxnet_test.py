@@ -41,7 +41,12 @@ class conversation_dictionary(object):
             except:
                 print("No existing pickled dictionary. Creating empty one.")
         else:
-            print("Current dictionary not empty, save first.")
+            save = input("Current dictionary not empty. " + \
+                         "Do you wish to save first? (y/n).")
+            if save == "y":
+                self.dictionary.save_dictionary()
+            else:
+                print("Okay")
 
     def save_dictionary(self):
         ## Dump (write) dictionary to disk
@@ -176,9 +181,8 @@ def test_run():
     dic = conversation_dictionary()
     prob_model = model()
     dic.load_dictionary()
-    dic.to_string()
-    prob_model.train(dic)
-    #print(prob_model.get_response((('Hi', 'UH', 'discourse'),), (('Hey', 'UH', 'ROOT'),)))
+    #prob_model.train(dic)
+    #print(prob_model.get_response((("'s", 'VBZ', 'ROOT'), ('What', 'WP', 'nsubj'), ('up', 'RP', 'advmod'), ('?', '.', 'punct')), (('much', 'JJ', 'ROOT'),('Not', 'RB', 'neg'), ('.', '.', 'punct'))))
     user_input = input("You (X to exit): ")
     while user_input != "X":
         #escape single quotes for words such as what're

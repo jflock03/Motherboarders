@@ -70,7 +70,6 @@ class probability_model(object):
                             else:
                                 self.dictionary[word][key][response_word[0]] = 1
 
-        self.to_string()
 
     def to_string(self):
         for key, val in self.dictionary.items():
@@ -102,18 +101,20 @@ class probability_model(object):
         return myWordCandidates[i]
             
     def get_response(self, input_sentence, output_format):
-        
         strip_format = self.remove_words_from_tags(output_format)
         response_string = ''
         for tags in strip_format:
             response_candidates = {}
             for tagged_word in input_sentence:
                 my_words = self.dictionary[tagged_word[0]][tags]
+                print(tagged_word[0], tags, my_words)
+                word_sum = sum(my_words.values())
                 for word in my_words:
                     if word in response_candidates:
-                        response_candidates[word] += my_words[word]
+                        response_candidates[word] += my_words[word] / word_sum
                     else:
-                        response_candidates[word] = my_words[word]
+                        response_candidates[word] = my_words[word] / word_sum
+            print(tags, response_candidates)
             response_word = self.find_max(response_candidates)
 
             response_string += response_word
