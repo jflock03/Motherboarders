@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import subprocess
 from subprocess import call
 import pickle
@@ -95,6 +94,28 @@ class conversation_dictionary(object):
         print("Time elapsed: %.1f" % (time_end-time_start))
         self.save_dictionary()
         print("Data added successfully.")
+
+    def clean_tree(tree, initial_sentence):
+        ##Input: Takes in the string representing a tree and cleans it
+        ##Idea: Go until you find a \n and take everything before it.
+        ##      Then skip every non-alphabet or punctuation character and repeat.
+        ##Returns: Vector tuple of sentence: ((sentence_tuple), (word1_list), (word2_list))
+
+        sentence_vector = [initial_sentence]
+        start_of_tree = tree.find("Input:")
+        tree = tree[start_of_tree+7:]
+        tree_list = tree.split("\n")
+        for word in tree_list[1:]:
+            word = word.replace("+--", "")
+            word_vector = word.split(' ')
+            while '' in word_vector:
+                word_vector.remove('')
+            while '|' in word_vector:
+                word_vector.remove('|')
+            if len(word_vector) >= 1 and 'Parse:' not in word_vector:
+                sentence_vector.append(tuple(word_vector))
+        
+        return tuple(sentence_vector)
         
     def compare_parsey_vectors(self, vector1, vector2):
         ##Takes in parseyed vectors1 and 2
@@ -151,78 +172,3 @@ class conversation_dictionary(object):
         ## Add if max_value not over some threshold, then create response based on prob model
                 
         return response_vector
-            
-        
-
-def clean_tree(tree, initial_sentence):
-    ##Input: Takes in the string representing a tree and cleans it
-    ##Idea: Go until you find a \n and take everything before it.
-    ##      Then skip every non-alphabet or punctuation character and repeat.
-    ##Returns: Vector tuple of sentence: ((sentence_tuple), (word1_list), (word2_list))
-
-    sentence_vector = [initial_sentence]
-    start_of_tree = tree.find("Input:")
-    tree = tree[start_of_tree+7:]
-    tree_list = tree.split("\n")
-    for word in tree_list[1:]:
-        word = word.replace("+--", "")
-        word_vector = word.split(' ')
-        while '' in word_vector:
-            word_vector.remove('')
-        while '|' in word_vector:
-            word_vector.remove('|')
-        if len(word_vector) >= 1 and 'Parse:' not in word_vector:
-            sentence_vector.append(tuple(word_vector))
-    
-    return tuple(sentence_vector)
-
-
-def test_run():
-    dic = conversation_dictionary()
-    prob_model = model()
-    dic.load_dictionary()
-    #prob_model.train(dic)
-    #print(prob_model.get_response((("'s", 'VBZ', 'ROOT'), ('What', 'WP', 'nsubj'), ('up', 'RP', 'advmod'), ('?', '.', 'punct')), (('much', 'JJ', 'ROOT'),('Not', 'RB', 'neg'), ('.', '.', 'punct'))))
-    user_input = input("You (X to exit): ")
-    while user_input != "X":
-        #escape single quotes for words such as what're
-        if "'" in user_input:
-            user_input = user_input.replace("'", "\\'")
-            
-        stdoutdata = subprocess.check_output('echo ' + user_input + ' | syntaxnet/demo.sh', shell=True)
-        stdoutdata = str(stdoutdata,'utf-8')
-        
-        vector = clean_tree(stdoutdata, user_input)
-        print("Bot: ", dic.get_best_response(vector))
-
-        user_input = input("You (X to exit): ")
-       
-def main():
-##    dic = conversation_dictionary()
-##    dic.add_data('greetings_data.txt')
-##    dic.to_string()
-    print("--- Welcome to Motherboarders automatic text response program ---")
-    print("-"*75)
-    print("Options: 1. Add data to the bot" +
-                        " 2. Talk to the bot (X to exit)")
-    user_choice = input("Choice: ")
-    while user_choice != "X":
-        if user_choice == "1":
-            file_name = input("Name of data text file: ")
-            dic = conversation_dictionary()
-            try:
-                dic.add_data(file_name)
-            except:
-                print("No data file of that name found.")   
-        elif user_choice == "2":
-            test_run()
-        else:
-            print("Choose option 1 or option 2 or X to exit")
-        print("-"*75)
-        print("Options: 1. Add data to the bot" +
-                        " 2. Talk to the bot (X to exit)")            
-        user_choice = input("Choice: ")
-  
-main()
-
-
