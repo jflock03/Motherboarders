@@ -53,6 +53,7 @@ class probability_model(object):
                             if response_word[0] in self.dictionary[word][key]:
                                 self.dictionary[word][key][response_word[0]]+=1
                             else:
+                                ## maybe lowercase response word?
                                 self.dictionary[word][key][response_word[0]] = 1
                 else:
                     ## Tagged input word is already in main dictionary
@@ -68,6 +69,7 @@ class probability_model(object):
                             if response_word[0] in self.dictionary[word][key]:
                                 self.dictionary[word][key][response_word[0]]+=1
                             else:
+                                ## maybe lowercase response word?
                                 self.dictionary[word][key][response_word[0]] = 1
 
 
