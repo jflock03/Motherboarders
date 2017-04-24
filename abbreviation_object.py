@@ -12,11 +12,13 @@ class slang(object):
             sys.exit(0)
         for line in file:
             line = line.strip()
-            pair = line.split(';')
+            line = line.lower()
+            pair = line.split(':')
             self.dictionary[pair[0]] = pair[1]
         file.close()
 
     def get(self, abbr):
+        abbr = abbr.lower()
         if abbr in self.dictionary:
             return self.dictionary[abbr]
         else:
