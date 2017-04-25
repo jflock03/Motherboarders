@@ -38,6 +38,7 @@ class probability_model(object):
         for input_vector, response_vector in dictionary.dictionary.items():
             for word in input_vector[1:]:
                 word = word[0]
+                word = word.lower()
                 if word not in self.dictionary:
                     ## If tagged input word not already in main dictionary
                     self.dictionary[word] = {}
@@ -101,26 +102,71 @@ class probability_model(object):
                 myWordCandidates.append(word)
         i = random.randint(0, len(myWordCandidates)-1)
         return myWordCandidates[i]
+
+    def reorder_vector(self, vector):
+        string = vector[0]
+        tagged_words = vector[1:]
+
+        indexed_list = []
+        seen_words = []
+
+        for tagged_word in tagged_words:
+            word = tagged_word[0]
+            seen_count = seen_words.count(word)
+            if seen_count > 0:
+                new_string = string
+                char_skipped = 0
+                for i in range(seen_count):
+                    ind = new_string.find(word)
+                    char_skipped += (ind + len(word))
+                    new_string = new_string[ind+len(word):]
+                ind = new_string.find(word)
+                index = ind + char_skipped        
+            else:
+                seen_words.append(word)
+                index = string.find(word)
+
+            tagged_word_list = [index, word, tagged_word[1], tagged_word[2]]
+            indexed_list.append(tagged_word_list)
+
+        new_string = ''
+
+        return_list = []
+        while len(indexed_list) > 0:
+            cur = min(indexed_list[j][0] for j in range(0,len(indexed_list)))
+            for tagged_word in indexed_list:
+                if tagged_word[0] == cur:
+                    return_list.append(tuple(tagged_word[1:]))
+                    indexed_list.remove(tagged_word)
+        return tuple(return_list)
             
     def get_response(self, input_sentence, output_format):
-        strip_format = self.remove_words_from_tags(output_format)
+        reordered_output_format = self.reorder_vector(output_format)
+        strip_format = self.remove_words_from_tags(reordered_output_format)
         response_string = ''
+        x = 0
         for tags in strip_format:
             response_candidates = {}
-            for tagged_word in input_sentence:
-                my_words = self.dictionary[tagged_word[0]][tags]
-                print(tagged_word[0], tags, my_words)
-                word_sum = sum(my_words.values())
-                for word in my_words:
-                    if word in response_candidates:
-                        response_candidates[word] += my_words[word] / word_sum
-                    else:
-                        response_candidates[word] = my_words[word] / word_sum
-            print(tags, response_candidates)
+            for tagged_word in input_sentence[1:]:
+                try:
+                    my_words = self.dictionary[tagged_word[0]][tags]
+                    word_sum = sum(my_words.values())
+                    for word in my_words:
+                        if word in response_candidates:
+                            response_candidates[word] += my_words[word] / word_sum
+                        else:
+                            response_candidates[word] = my_words[word] / word_sum
+                except:
+                    # No tags corresponding to current word
+                    continue
+
             response_word = self.find_max(response_candidates)
 
-            response_string += response_word
-            response_string += ' '
+            if x == 0 or response_word == "," or response_word == ".":
+                response_string += response_word
+            else:
+                response_string += ' ' + response_word
+            x = 1
 
         return response_string
         

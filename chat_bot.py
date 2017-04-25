@@ -35,10 +35,11 @@ def talk_to():
     dic = conversation_dic()
     prob_model = model()
     dic.load_dictionary()
-    #prob_model.train(dic)
-    #print(prob_model.get_response((("'s", 'VBZ', 'ROOT'), ('What', 'WP', 'nsubj'), ('up', 'RP', 'advmod'), ('?', '.', 'punct')), (('much', 'JJ', 'ROOT'),('Not', 'RB', 'neg'), ('.', '.', 'punct'))))
+    prob_model.train(dic)
+    #print(prob_model.get_response(("What's up?", ("'s", 'VBZ', 'ROOT'), ('What', 'WP', 'nsubj'), ('up', 'RP', 'advmod'), ('?', '.', 'punct')), ('Not much.',('much', 'JJ', 'ROOT'),('Not', 'RB', 'neg'), ('.', '.', 'punct'))))
     user_input = input("You (X to exit): ")
     while user_input != "X":
+        user_input = user_input.lower()
         #escape single quotes for words such as what're
         if "'" in user_input:
             user_input = user_input.replace("'", "\\'")
@@ -47,7 +48,13 @@ def talk_to():
         stdoutdata = str(stdoutdata,'utf-8')
         
         vector = clean_tree(stdoutdata, user_input)
-        print("Bot: ", dic.get_best_response(vector))
+
+        answer, resp = dic.get_best_response(vector)
+        if answer == 0:
+            print("Bot: ", resp)
+        else:
+            print("prob")
+            print("Bot:", prob_model.get_response(vector, resp))
 
         user_input = input("You (X to exit): ")
        
@@ -61,10 +68,9 @@ def main():
         if user_choice == "1":
             file_name = input("Name of data text file: ")
             dic = conversation_dic()
-            try:
-                dic.add_data(file_name)
-            except:
-                print("No data file of that name found.")   
+            dic.add_data(file_name)
+##            except:
+##                print("No data file of that name found.")   
         elif user_choice == "2":
             talk_to()
         else:

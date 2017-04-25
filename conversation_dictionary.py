@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 import random
 import time
-from prob_model import probability_model as model
+import math
 
 class conversation_dictionary(object):
     ## Dictionary object
@@ -13,7 +13,7 @@ class conversation_dictionary(object):
     
     def __init__(self):
         self.dictionary = {}
-
+        
     def add_pair(self, input_vector, output_vector):
         ## Takes in a tagged input vector and tagged reponse vector
         ## Adds response vector to list of reponses if input vector already exists
@@ -66,22 +66,24 @@ class conversation_dictionary(object):
             if x == 1:
                 # Input statement
                 statement = line
+                statement = statement.lower()
                 if "'" in statement:
                     statement = statement.replace("'", "\\'")
                 parseyed_statement = subprocess.check_output('echo ' + statement + ' | syntaxnet/demo.sh', shell=True)
                 time.sleep(.01)
                 parseyed_statement = str(parseyed_statement,'utf-8')
-                statement_vector = clean_tree(parseyed_statement, line)
+                statement_vector = self.clean_tree(parseyed_statement, line)
                 x += 1
             elif x == 2:
                 # Response
                 response = line
+                response = response.lower()
                 if "'" in response:
                     response = response.replace("'", "\\'")
                 parseyed_response = subprocess.check_output('echo ' + response + ' | syntaxnet/demo.sh', shell=True)
                 time.sleep(.01)
                 parseyed_response = str(parseyed_response,'utf-8')
-                response_vector = clean_tree(parseyed_response, line)
+                response_vector = self.clean_tree(parseyed_response, line)
                 # Store statement/response pair in db
                 self.add_pair(statement_vector, response_vector)
                 x = 1
@@ -95,7 +97,7 @@ class conversation_dictionary(object):
         self.save_dictionary()
         print("Data added successfully.")
 
-    def clean_tree(tree, initial_sentence):
+    def clean_tree(self, tree, initial_sentence):
         ##Input: Takes in the string representing a tree and cleans it
         ##Idea: Go until you find a \n and take everything before it.
         ##      Then skip every non-alphabet or punctuation character and repeat.
@@ -167,8 +169,11 @@ class conversation_dictionary(object):
             if result_score > max_value:
                 max_value = result_score
                 random_index = random.randint(0, len(value)-1)
-                response_vector = value[random_index][0]
+                response = value[random_index]
 
-        ## Add if max_value not over some threshold, then create response based on prob model
-                
-        return response_vector
+        ## If max value is the max that it can be, just return the response
+        if max_value >= math.sqrt(len(response) * 3 + 1):      
+            return 0, response[0]
+        # If not return 1 and the response so that prob model can be used
+        else:
+            return 1, response 
