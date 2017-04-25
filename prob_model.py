@@ -162,7 +162,9 @@ class probability_model(object):
 
             response_word = self.find_max(response_candidates)
 
-            if x == 0 or response_word == "," or response_word == ".":
+            if x == 0 or response_word == "," or response_word == "." \
+               or "'" in response_word or reponse_word == "?" \
+               or reponse_word == "!":
                 response_string += response_word
             else:
                 response_string += ' ' + response_word

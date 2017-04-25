@@ -53,8 +53,10 @@ def talk_to():
         if answer == 0:
             print("Bot: ", resp)
         else:
-            print("prob")
-            print("Bot:", prob_model.get_response(vector, resp))
+            try:
+                print("Bot:", prob_model.get_response(vector, resp))
+            except: #Words not found in probability, just return resp
+                print("Bot:", resp[0])
 
         user_input = input("You (X to exit): ")
        

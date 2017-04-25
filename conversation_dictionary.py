@@ -172,7 +172,7 @@ class conversation_dictionary(object):
                 response = value[random_index]
 
         ## If max value is the max that it can be, just return the response
-        if max_value >= math.sqrt(len(response) * 3 + 1):      
+        if max_value >= .75 * math.sqrt((len(response)-1) * 3 + 1):      
             return 0, response[0]
         # If not return 1 and the response so that prob model can be used
         else:
