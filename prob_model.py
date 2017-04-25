@@ -35,6 +35,7 @@ class probability_model(object):
         pickle.dump(self.dictionary, open( dic_file, "wb"))
 
     def train(self, dictionary):
+        ## Iterate through the input/response dictionary and create prob model
         for input_vector, response_vector in dictionary.dictionary.items():
             for word in input_vector[1:]:
                 word = word[0]
@@ -54,7 +55,6 @@ class probability_model(object):
                             if response_word[0] in self.dictionary[word][key]:
                                 self.dictionary[word][key][response_word[0]]+=1
                             else:
-                                ## maybe lowercase response word?
                                 self.dictionary[word][key][response_word[0]] = 1
                 else:
                     ## Tagged input word is already in main dictionary
@@ -84,6 +84,8 @@ class probability_model(object):
 
                         
     def remove_words_from_tags(self, tagged_sentence):
+        ## Removes the word from it's tags in order to put it into the
+        ## probability dicitonary. ex: (hand, NN, nsubj) to (NN, nsubj)
         my_lis = []
         for tagged_word in tagged_sentence:
             tags = tagged_word[1:]
@@ -92,6 +94,7 @@ class probability_model(object):
         return tuple(my_lis)
 
     def find_max(self, dictionary):
+        ## Finds the highest probable word from the corresponding tags
         myMax = 0
         myWordCandidates = []
         for word, count in dictionary.items():
@@ -104,6 +107,7 @@ class probability_model(object):
         return myWordCandidates[i]
 
     def reorder_vector(self, vector):
+        ## Reorders the vector that parsey returns into it's original word order
         string = vector[0]
         tagged_words = vector[1:]
 
@@ -141,6 +145,10 @@ class probability_model(object):
         return tuple(return_list)
             
     def get_response(self, input_sentence, output_format):
+        ## Creates a list of reponse candidates corresponding with the current
+        ## tagged words from the input sentence. Then gets the most probable
+        ## words and creates a sentence by concatenating them together.
+        
         reordered_output_format = self.reorder_vector(output_format)
         strip_format = self.remove_words_from_tags(reordered_output_format)
         response_string = ''

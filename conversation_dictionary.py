@@ -7,9 +7,9 @@ import time
 import math
 
 class conversation_dictionary(object):
-    ## Dictionary object
+    ## Dictionary object containing input/response vector pairs
     ## Each dictionary key = input vector, value = list of response vectors
-    ## Vector format: [[list of words],[tagged root word],[next tagged word],..]
+    ## Vector format: ((sentence),(tagged root word),(next tagged word),..)
     
     def __init__(self):
         self.dictionary = {}
