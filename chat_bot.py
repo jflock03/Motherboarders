@@ -36,7 +36,6 @@ def talk_to():
     prob_model = model()
     dic.load_dictionary()
     prob_model.train(dic)
-    #print(prob_model.get_response(("What's up?", ("'s", 'VBZ', 'ROOT'), ('What', 'WP', 'nsubj'), ('up', 'RP', 'advmod'), ('?', '.', 'punct')), ('Not much.',('much', 'JJ', 'ROOT'),('Not', 'RB', 'neg'), ('.', '.', 'punct'))))
     user_input = input("You (X to exit): ")
     while user_input != "X":
         user_input = user_input.lower()
